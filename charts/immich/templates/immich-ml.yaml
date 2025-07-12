@@ -1,0 +1,64 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ .Values.name }}-machine-learning"
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: {{ default 1 .Values.replicas.ml }}
+  selector:
+    matchLabels:
+      app: "{{ .Values.name }}-machine-learning"
+  template:
+    metadata:
+      labels:
+        app: "{{ .Values.name }}-machine-learning"
+    spec:
+      {{- if .Values.hwAcceleration.enabled }}
+        {{- if eq .Values.hwAcceleration.type "nvidia" }}
+        runtimeClassName: nvidia
+        {{- end}}
+      {{- end }}        
+      containers:
+      - name: "{{ .Values.name }}-machine-learning"
+      {{- if .Values.hwAcceleration.enabled }}
+        {{- if eq .Values.hwAcceleration.type "nvidia" }}
+        image: "ghcr.io/immich-app/immich-machine-learning:{{ .Values.immichVersion }}-cuda"
+        {{- else if eq .Values.hwAcceleration.type "intel" }}
+        image: "ghcr.io/immich-app/immich-machine-learning:{{ .Values.immichVersion }}-openvino"
+        {{- end }}
+      {{- end }}
+        {{- if not .Values.hwAcceleration.enabled }}
+        image: "ghcr.io/immich-app/immich-machine-learning:{{ .Values.immichVersion }}"
+        {{- end }}
+        envFrom:
+        - configMapRef:
+            name: "{{ .Values.name }}-config"
+        env:
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.secrets.db.name }}
+              key: {{ .Values.secrets.db.key }}
+        {{- if .Values.hwAcceleration.enabled }}
+          {{- if eq .Values.hwAcceleration.type "nvidia" }}
+        resources:
+          limits:
+            nvidia.com/gpu: 1
+          requests:
+            nvidia.com/gpu: 1
+          {{- else if eq .Values.hwAcceleration.type "intel" }}
+        resources:
+          limits:
+            gpu.intel.com/i915: "1"
+          requests:
+            gpu.intel.com/i915: "1"
+          {{- end }}
+        {{- end }}
+        volumeMounts:
+        - name: model-cache
+          mountPath: /cache
+      volumes:
+      - name: model-cache
+        persistentVolumeClaim:
+          claimName: {{ .Values.persistence.modelCache.existingClaimName }}

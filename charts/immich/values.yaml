@@ -1,0 +1,59 @@
+---
+name: immich
+namespace: default
+
+immichVersion: "v1.135.3"
+
+redisImage: docker.io/valkey/valkey:8-bookworm@sha256:fec42f399876eb6faf9e008570597741c87ff7662a54185593e74b09ce83d177
+
+postgresImage: ghcr.io/immich-app/postgres:14-vectorchord0.3.0-pgvectors0.2.0
+
+replicas:
+  app: 1
+  ml: 1
+
+env:
+  timezone: "UTC"
+  environment: "production" # Options: "production", "development"
+  logLevel: "log" # Options: "verbose, ""debug", "log", "warn", "error"
+  noColor: false
+  processInvalidImages: false
+
+  db:
+#   port: "5432" # Optional, defaults to "5432"
+    username: "postgres"
+    name: "immich"
+#  redisPort: 6379
+
+# Optional settings for machine learning 
+#  modelTTL: "300"
+#  modelTTLPollS: "60"
+#  interOpThreads: "1"
+#  intraOpThreads: "1"
+#  workers: "1"
+#  httpKeepAliveTimeoutS: "2"
+
+hwAcceleration:
+  enabled: false
+# type: "nvidia"  # Options: "nvidia", "intel", or leave empty for no hardware acceleration
+
+secrets:
+  db:
+    name: immich-db-password
+    key: password
+
+persistence:
+  pictures:
+    existingClaimName: immich-pictures
+  modelCache:
+    existingClaimName: immich-model-cache
+  postgres:
+    existingClaimName: immich-postgres
+
+services:
+  app:
+    type: LoadBalancer # Options: "ClusterIP", "NodePort", "LoadBalancer"
+    port: 2283
+  ml:
+    type: LoadBalancer # Options: "ClusterIP", "NodePort", "LoadBalancer"
+    port: 3003

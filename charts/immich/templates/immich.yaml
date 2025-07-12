@@ -1,0 +1,66 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ .Values.name }}-app"
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: {{ default 1 .Values.replicas.app }}
+  selector:
+    matchLabels:
+      app: "{{ .Values.name }}-app"
+  template:
+    metadata:
+      labels:
+        app: "{{ .Values.name }}-app"
+    spec:
+      initContainers:
+      - name: wait-for-redis
+        image: busybox
+        command:
+        - sh
+        - -c
+        - |
+          until nc -z -v -w30 "{{ .Values.name }}-redis-service" {{ default 6379 .Values.env.redisPort }}; do
+            echo "Waiting for redis database to be ready..."
+            sleep 2
+          done
+      - name: wait-for-psql
+        image: busybox
+        command:
+        - sh
+        - -c
+        - |
+          until nc -z -v -w30 "{{ .Values.name }}-postgres-service" {{ default 5432 .Values.env.db.port }}; do
+            echo "Waiting for psql database to be ready"
+            sleep 2
+          done
+      - name: wait-for-machine-learning
+        image: busybox
+        command:
+        - sh
+        - -c
+        - |
+          until nc -z -v -w30 "{{ .Values.name }}-machine-learning-service" 3003; do
+            echo "Waiting for machine learning service to be ready"
+            sleep 2
+          done
+      containers:
+      - name: "{{ .Values.name }}-server"
+        image: "ghcr.io/immich-app/immich-server:{{ .Values.immichVersion }}"
+        envFrom:
+        - configMapRef:
+            name: "{{ .Values.name }}-config"
+        env:
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.secrets.db.name }}
+              key: {{ .Values.secrets.db.key }}
+        volumeMounts:
+        - mountPath: /usr/src/app/upload
+          name: pictures
+      volumes:
+      - name: pictures
+        persistentVolumeClaim:
+          claimName: {{ .Values.persistence.pictures.existingClaimName }}

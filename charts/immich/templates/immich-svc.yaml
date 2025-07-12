@@ -1,0 +1,79 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ .Values.name }}-service"
+  namespace: {{ .Values.namespace }}
+spec:
+  {{- if eq .Values.services.app.type "ClusterIP" }}
+  type: ClusterIP
+  {{- else if eq .Values.services.app.type "NodePort" }}
+  type: NodePort
+  {{- else if eq .Values.services.app.type "LoadBalancer" }}
+  type: LoadBalancer
+  {{- end }}
+  selector:
+    app: "{{ .Values.name }}-app"
+  ports:
+  - targetPort: 2283
+    {{- if eq .Values.services.app.type "LoadBalancer" }}
+    port: {{ default 2283 .Values.services.app.port }}
+    {{- else if eq .Values.services.app.type "NodePort" }}
+    nodePort: {{ default 32283 .Values.services.app.nodePort }}
+    {{- else }}
+    port: 2283
+    {{- end }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ .Values.name }}-machine-learning-service"
+  namespace: {{ .Values.namespace }}
+spec:
+  {{- if eq .Values.services.ml.type "ClusterIP" }}
+  type: ClusterIP
+  {{- else if eq .Values.services.ml.type "NodePort" }}
+  type: NodePort
+  {{- else if eq .Values.services.ml.type "LoadBalancer" }}
+  type: LoadBalancer
+  {{- end }}
+  selector:
+    app: "{{ .Values.name }}-machine-learning"
+  ports:
+  - targetPort: 3003
+    {{- if eq .Values.services.ml.type "LoadBalancer" }}
+    port: {{ default 3003 .Values.services.ml.port }}
+    {{- else if eq .Values.services.ml.type "NodePort" }}
+    nodePort: {{ default 30003 .Values.services.ml.nodePort }}
+    {{- else }}
+    port: 3003
+    {{- end }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ .Values.name }}-postgres-service"
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: "{{ .Values.name }}-postgres-db"
+  ports:
+    - protocol: TCP
+      port: {{ default 5432 .Values.env.db.port }}
+      targetPort: {{ default 5432 .Values.env.db.port }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ .Values.name }}-redis-service"
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: "{{ .Values.name }}-redis-db"
+  ports:
+    - protocol: TCP
+      port: {{ default 6379 .Values.env.redisPort }}
+      targetPort: {{ default 6379 .Values.env.redisPort }}

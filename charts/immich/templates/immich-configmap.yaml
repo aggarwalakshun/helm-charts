@@ -1,0 +1,24 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{ .Values.name }}-config"
+  namespace: {{ .Values.namespace }}
+data:
+  TZ: "{{ default "UTC" .Values.env.timezone }}"
+  IMMICH_ENV: "{{ default "production" .Values.env.environment }}"
+  IMMICH_LOG_LEVEL: "{{ default "log" .Values.env.logLevel }}"
+  NO_COLOR: "{{ default "false" .Values.env.noColor }}"
+  IMMICH_PROCESS_INVALID_IMAGES: "{{ default "false" .Values.env.processInvalidImages }}"
+  DB_HOSTNAME: "{{ .Values.name }}-postgres-service"
+  DB_PORT: "{{ default "5432" .Values.env.db.port }}"
+  DB_USERNAME: "{{ default "postgres"  .Values.env.db.username }}"
+  DB_NAME: "{{ default "immich" .Values.env.db.name }}"
+  REDIS_HOSTNAME: "{{ .Values.name }}-redis-service"
+  REDIS_PORT: "{{ default "6379" .Values.env.redisPort }}"
+  MACHINE_LEARNING_MODEL_TTL: "{{  default "300" .Values.env.modelTTL }}"
+  MACHINE_LEARNING_MODEL_TTL_POLL_S: "{{ default "60" .Values.env.modelTTLPollS }}"
+  MACHINE_LEARNING_MODEL_INTER_OP_THREADS: "{{ default "1" .Values.env.interOpThreads }}"
+  MACHINE_LEARNING_MODEL_INTRA_OP_THREADS: "{{ default "1" .Values.env.intraOpThreads }}"
+  MACHINE_LEARNING_WORKERS: "{{ default "1" .Values.env.workers }}"
+  MACHINE_LEARNING_HTTP_KEEPALIVE_TIMEOUT_S: "{{ default "2" .Values.env.httpKeepAliveTimeoutS }}"

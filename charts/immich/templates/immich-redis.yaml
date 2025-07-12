@@ -1,0 +1,21 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ .Values.name }}-redis-db"
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: "{{ .Values.name }}-redis-db"
+  template:
+    metadata:
+      labels:
+        app: "{{ .Values.name }}-redis-db"
+    spec:
+      containers:
+      - name: "{{ .Values.name }}-redis-db"
+        image: {{ .Values.redisImage }}
+        envFrom:
+        - configMapRef:
+            name: "{{ .Values.name }}-config"

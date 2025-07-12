@@ -1,0 +1,46 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ .Values.name }}-postgres-db"
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: "{{ .Values.name }}-postgres-db"
+  template:
+    metadata:
+      labels:
+        app: "{{ .Values.name }}-postgres-db"
+    spec:
+      initContainers:
+      - name: cleanup-postgres
+        image: busybox
+        command:
+        - sh
+        - -c
+        - rm -rf /var/lib/postgresql/data/lost+found
+        volumeMounts:
+        - name: postgres
+          mountPath: /var/lib/postgresql/data
+      containers:
+      - name: "{{ .Values.name }}-postgres-db"
+        image: {{ .Values.postgresImage }} 
+        env:
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.secrets.db.name }}
+              key: {{ .Values.secrets.db.key }}
+        - name: POSTGRES_INITDB_ARGS
+          value: "--data-checksums"
+        envFrom:
+        - configMapRef:
+            name: "{{ .Values.name }}-config"
+        volumeMounts:
+        - mountPath: /var/lib/postgresql/data
+          name: postgres
+      volumes:
+      - name: postgres
+        persistentVolumeClaim:
+          claimName: {{ .Values.persistence.postgres.existingClaimName }}
