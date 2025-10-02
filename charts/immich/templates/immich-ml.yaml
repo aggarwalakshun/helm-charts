@@ -16,7 +16,7 @@ spec:
     spec:
       {{- if .Values.hwAcceleration.enabled }}
         {{- if eq .Values.hwAcceleration.type "nvidia" }}
-        runtimeClassName: nvidia
+      runtimeClassName: nvidia
         {{- end}}
       {{- end }}        
       containers:
