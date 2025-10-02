@@ -1,4 +1,5 @@
-name: Release Helm Charts
+name: Release Charts
+
 on:
   push:
     branches:
@@ -6,6 +7,8 @@ on:
 
 jobs:
   release:
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -13,29 +16,12 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Configure Git user
+      - name: Configure Git
         run: |
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
-      - name: Get changed charts
-        id: changed_charts
-        run: |
-          CHANGED=$(git diff --name-only HEAD~1 HEAD | grep '^charts/' | cut -d/ -f2 | sort -u | xargs)
-          echo "changed_charts=$CHANGED" >> $GITHUB_OUTPUT
-
-      - name: Prepare only changed charts
-        if: steps.changed_charts.outputs.changed_charts != ''
-        run: |
-          mkdir changed-charts
-          for chart in ${{ steps.changed_charts.outputs.changed_charts }}; do
-            cp -r charts/$chart changed-charts/
-          done
-
-      - name: Run chart-releaser job
-        if: steps.changed_charts.outputs.changed_charts != ''
+      - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.7.0
         env:
           CR_TOKEN: "${{ secrets.CR_TOKEN }}"
-        with:
-          charts_dir: changed-charts
