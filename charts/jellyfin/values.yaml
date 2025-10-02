@@ -1,0 +1,22 @@
+---
+#
+# Optional values are commented out to show defaults
+#
+
+# name: jellyfin
+# namespace: default
+# replicas: 1
+
+# versionOverride: "10.10.7"
+
+hwAccel:
+  enabled: false
+
+persistence:
+  configClaim: jellyfin-ceph
+  cacheClaim: jellyfin-cache-claim
+  mediaClaim: jellyfin-media-pvc
+
+# serviceType: ClusterIP
+# servicePort: 8096
+# serviceNodePort: 30096
