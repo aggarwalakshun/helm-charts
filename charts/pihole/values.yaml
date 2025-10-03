@@ -1,0 +1,22 @@
+---
+#
+# Optional values are commented out to show defaults
+#
+
+# name: pihole
+# namespace: default
+# replicas: 1
+
+# versionOverride: "2025.08.0"
+
+claimName: pihole-data-claim
+
+# TZ: "UTC"
+# FTLlocalIPv4: "8.8.8.8;8.8.4.4"
+# tailFTLLog: "1"
+# piholeUID: "1000"
+# piholeGID: "1000"
+
+# serviceType: ClusterIP
+# servicePort: 8080
+# serviceNodePort: 30080
