@@ -32,4 +32,15 @@ entries:
     urls:
     - https://github.com/aggarwalakshun/helm-charts/releases/download/jellyfin-0.1.1/jellyfin-0.1.1.tgz
     version: 0.1.1
-generated: "2025-10-02T15:22:34.490651641Z"
+  pihole:
+  - apiVersion: v2
+    appVersion: v2025.08.0
+    created: "2025-10-03T11:28:16.667003435Z"
+    description: A Helm chart for Pihole
+    digest: 18499079ba3217c82a15650de330e5e12e02bffea106a251573388cc1a197a65
+    name: pihole
+    type: application
+    urls:
+    - https://github.com/aggarwalakshun/helm-charts/releases/download/pihole-0.1.0/pihole-0.1.0.tgz
+    version: 0.1.0
+generated: "2025-10-03T11:28:16.667015357Z"
