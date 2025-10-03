@@ -1,0 +1,12 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{ .Values.name }}-config"
+  namespace: "{{ default "default" .Values.namespace }}"
+data:
+  TZ: "{{ default "UTC" .Values.TZ }}"
+  FTLCONF_LOCAL_IPV4: "{{ default "8.8.8.8;8.8.4.4" .Values.FTLlocalIPv4 }}"
+  TAIL_FTL_LOG: "{{ default "1" .Values.tailFTLLog }}"
+  PIHOLE_UID: "{{ default "1000" .Values.piholeUID }}"
+  PIHOLE_GID: "{{ default "1000" .Values.piholeGID }}"

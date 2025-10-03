@@ -1,0 +1,34 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ default "pihole" .Values.name }}"
+  namespace: {{ default "default" .Values.namespace }}
+spec:
+  replicas: {{ default 1 .Values.replicas }}
+  selector:
+    matchLabels:
+      app: "{{ default "pihole" .Values.name }}"
+  template:
+    metadata:
+      labels:
+        app: "{{ default "pihole" .Values.name }}"
+    spec:
+      hostNetwork: true
+      containers:
+      - name: "{{ default "pihole" .Values.name }}"
+        image: "docker.io/pihole/pihole:{{ default "2025.08.0" .Values.versionOverride }}"
+        securityContext:
+          capabilities:
+            add:
+            - NET_ADMIN
+        envFrom:
+        - configMapRef:
+            name: "{{ default "pihole" .Values.name }}-config"
+        volumeMounts:
+        - name: pihole-data
+          mountPath: /etc/pihole
+      volumes:
+      - name: pihole-data
+        persistentVolumeClaim:
+          claimName: "{{ .Values.claimName }}"
